@@ -24,7 +24,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-if (!defined('_PS_VERSION_'))
+if (!defined('_TB_VERSION_'))
 	exit;
 
 class BlockSpecials extends Module
@@ -38,8 +38,8 @@ class BlockSpecials extends Module
 	{
 		$this->name = 'blockspecials';
 		$this->tab = 'pricing_promotion';
-		$this->version = '1.3.1';
-		$this->author = 'PrestaShop';
+		$this->version = '2.0.0';
+		$this->author = 'thirty bees';
 		$this->need_instance = 0;
 
 		$this->bootstrap = true;
