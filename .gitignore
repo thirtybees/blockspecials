@@ -1,1 +1,7 @@
-*blockspecials*.zip
+
+/translations/*
+!/translations/index.php
+
+/config*.xml
+
+blockspecials-*.zip
