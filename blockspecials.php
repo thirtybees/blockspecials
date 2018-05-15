@@ -60,7 +60,7 @@ class BlockSpecials extends Module
         $this->bootstrap = true;
         parent::__construct();
 
-        $this->displayName = $this->l('Specials block');
+        $this->displayName = $this->l('Block Specials');
         $this->description = $this->l('Adds a block displaying your current discounted products.');
 
         if (Configuration::get(static::CACHE_TIMESTAMP) < (time() - Configuration::get(static::CACHE_TTL))) {
