@@ -62,6 +62,7 @@ class BlockSpecials extends Module
 
         $this->displayName = $this->l('Block Specials');
         $this->description = $this->l('Adds a block displaying your current discounted products.');
+        $this->tb_versions_compliancy = '> 1.0.0';
 
         if (Configuration::get(static::CACHE_TIMESTAMP) < (time() - Configuration::get(static::CACHE_TTL))) {
             $this->clearCache();
