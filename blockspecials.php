@@ -53,7 +53,7 @@ class BlockSpecials extends Module
     {
         $this->name = 'blockspecials';
         $this->tab = 'pricing_promotion';
-        $this->version = '2.1.1';
+        $this->version = '2.1.2';
         $this->author = 'thirty bees';
         $this->need_instance = 0;
 
