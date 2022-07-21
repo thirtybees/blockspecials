@@ -159,15 +159,19 @@ class BlockSpecials extends Module
         if (!Configuration::get(static::NUMBER_OF_CACHES)
             || !$this->isCached('blockspecials.tpl', $this->getCacheId('blockspecials|'.$random))
         ) {
-            if (!($special = Product::getRandomSpecial((int) $this->context->language->id))
-                && !Configuration::get(static::ALWAYS_DISPLAY)
-            ) {
+            $special = Product::getRandomSpecial((int) $this->context->language->id);
+
+            if (!$special && !Configuration::get(static::ALWAYS_DISPLAY)) {
                 return '';
             }
 
+            $priceWithoutReduction = $special
+                ? Tools::ps_round($special['price_without_reduction'], 2)
+                : 0;
+
             $this->smarty->assign([
                 'special'                        => $special,
-                'priceWithoutReduction_tax_excl' => Tools::ps_round($special['price_without_reduction'], 2),
+                'priceWithoutReduction_tax_excl' => $priceWithoutReduction,
                 'mediumSize'                     => Image::getSize(ImageType::getFormatedName('medium')),
             ]);
         }
