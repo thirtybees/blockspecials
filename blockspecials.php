@@ -42,8 +42,6 @@ class BlockSpecials extends Module
     protected $_html = '';
     protected $_postErrors = [];
 
-    protected static $cache_specials;
-
     /**
      * BlockSpecials constructor.
      *
@@ -98,7 +96,8 @@ class BlockSpecials extends Module
             && $this->registerHook('updateproduct')
             && $this->registerHook('deleteproduct')
             && $this->registerHook('displayHomeTab')
-            && $this->registerHook('displayHomeTabContent');
+            && $this->registerHook('displayHomeTabContent')
+            && $this->registerHook('actionGetBlockTopMenuLinks');
 
         return $success;
     }
@@ -202,8 +201,9 @@ class BlockSpecials extends Module
      */
     public function hookHeader()
     {
-        if (Configuration::get('PS_CATALOG_MODE'))
+        if (Configuration::get('PS_CATALOG_MODE')) {
             return;
+        }
         $this->context->controller->addCSS(($this->_path).'blockspecials.css', 'all');
     }
 
@@ -246,15 +246,10 @@ class BlockSpecials extends Module
         }
 
         if (!$this->isCached('tab.tpl', $this->getCacheId('blockspecials-tab'))) {
-            BlockSpecials::$cache_specials = Product::getPricesDrop(
-                (int) $this->context->language->id,
-                0,
-                Configuration::get(static::NUMBER)
-            );
-        }
-
-        if (BlockSpecials::$cache_specials === false) {
-            return '';
+            $specials = $this->getSpecials();
+            if (!$specials && !Configuration::get(static::ALWAYS_DISPLAY)) {
+                return '';
+            }
         }
 
         return $this->display(__FILE__, 'tab.tpl', $this->getCacheId('blockspecials-tab'));
@@ -274,15 +269,16 @@ class BlockSpecials extends Module
         }
 
         if (!$this->isCached('blockspecials-home.tpl', $this->getCacheId('blockspecials-home'))) {
+            $specials = $this->getSpecials();
             $this->smarty->assign([
-                'specials' => BlockSpecials::$cache_specials,
+                'specials' => $specials,
                 'homeSize' => Image::getSize(ImageType::getFormatedName('home')),
             ]);
-        }
 
-        if (BlockSpecials::$cache_specials === false) {
-            return '';
-        };
+            if (!$specials && !Configuration::get(static::ALWAYS_DISPLAY)) {
+                return '';
+            }
+        }
 
         return $this->display(__FILE__, 'blockspecials-home.tpl', $this->getCacheId('blockspecials-home'));
     }
@@ -350,6 +346,9 @@ class BlockSpecials extends Module
             ],
         ];
 
+        /** @var AdminController $controller */
+        $controller = $this->context->controller;
+
         $helper = new HelperForm();
         $helper->show_toolbar = false;
         $helper->table = $this->table;
@@ -362,7 +361,7 @@ class BlockSpecials extends Module
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->tpl_vars = [
             'fields_value' => $this->getConfigFieldsValues(),
-            'languages'    => $this->context->controller->getLanguages(),
+            'languages'    => $controller->getLanguages(),
             'id_language'  => $this->context->language->id,
         ];
 
@@ -399,6 +398,8 @@ class BlockSpecials extends Module
      * @param string|null $name
      *
      * @return string
+     *
+     * @throws PrestaShopException
      */
     protected function getCacheId($name = null)
     {
@@ -419,6 +420,7 @@ class BlockSpecials extends Module
             'blockspecials.tpl' => null,
             'blockspecials-home.tpl' => 'blockspecials-home',
             'tab.tpl' => 'blockspecials-tab',
+            'block-top-menu.tpl' => 'block-top-menu',
         ];
 
         foreach ($caches as $template => $cacheId) {
@@ -427,4 +429,56 @@ class BlockSpecials extends Module
 
         Configuration::updateValue(static::CACHE_TIMESTAMP, time());
     }
+
+    /**
+     * @return array[]
+     */
+    public function hookActionGetBlockTopMenuLinks()
+    {
+        return [
+            [
+                'id' => 'SPECIALS',
+                'name' => $this->l('Specials'),
+                'render' => [$this, 'renderBlockTopMenu']
+            ]
+        ];
+    }
+
+    /**
+     * @return string
+     *
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     * @throws SmartyException
+     */
+    public function renderBlockTopMenu()
+    {
+        if (!$this->isCached('block-top-menu.tpl', $this->getCacheId('block-top-menu'))) {
+            if (!$this->getSpecials() && !Configuration::get(static::ALWAYS_DISPLAY)) {
+                return '';
+            }
+        }
+        return $this->display(__FILE__, 'block-top-menu.tpl', $this->getCacheId('block-top-menu'));
+    }
+
+
+    /**
+     * @return array
+     *
+     * @throws PrestaShopException
+     */
+    protected function getSpecials()
+    {
+        static $cache = null;
+        if (is_null($cache)) {
+            $specials = Product::getPricesDrop(
+                (int) $this->context->language->id,
+                0,
+                Configuration::get(static::NUMBER)
+            );
+            $cache = is_array($specials) ? $specials : [];
+        }
+        return $cache;
+    }
+
 }
