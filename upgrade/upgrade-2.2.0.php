@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2023-2023 thirty bees
+ * Copyright (C) 2017-2024 thirty bees
  *
  * thirty bees is an extension to the PrestaShop software by PrestaShop SA.
  *
@@ -15,7 +15,7 @@
  * to license@thirtybees.com so we can send you a copy immediately.
  *
  * @author    thirty bees <modules@thirtybees.com>
- * @copyright 2023-2023 thirty bees
+ * @copyright 2017-2024 thirty bees
  * @license   Academic Free License (AFL 3.0)
  */
 
